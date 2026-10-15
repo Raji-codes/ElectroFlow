@@ -1,20 +1,65 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+## 🏗️ System Architecture
 
-# Run and deploy your AI Studio app
+ElectroFlow is built on an event-driven, full-stack architecture combining a reactive React 19 frontend, an interactive 3D WebGL Digital Twin, real-time WebSocket state synchronization, and Google Gemini AI multimodal intelligence.
 
-This contains everything you need to run your app locally.
+```mermaid
+graph TB
+    subgraph ClientLayer["🖥️ Frontend & Presentation Layer (React 19 + TypeScript)"]
+        UI["Modern Dashboard & Analytics<br/><i>(Tailwind CSS v4 + Framer Motion)</i>"]
+        InvUI["Categorized Expandable Inventory<br/><i>(Stock Level Indicators, SKU Management)</i>"]
+        OrderUI["Order Lifecycle Tracker<br/><i>(Pending / Processing / Shipped / Delivered)</i>"]
+        Twin3D["3D Warehouse Digital Twin<br/><i>(Three.js + React Three Fiber + Drei)</i>"]
+        AIChat["AI Co-Pilot & Logistics Advisor<br/><i>(React-Markdown + Remark-GFM)</i>"]
+    end
 
-View your app in AI Studio: https://ai.studio/apps/86000989-5d67-4e88-b71a-ac91f9224873
+    subgraph CommLayer["⚡ Communication & Event Layer"]
+        HTTP["REST API Client<br/><i>(Fetch / Express Routes)</i>"]
+        WSClient["WebSocket Client<br/><i>(Real-Time State Listener)</i>"]
+    end
 
-## Run Locally
+    subgraph ServerLayer["⚙️ Backend Server (Node.js + Express + TSX)"]
+        Router["Express API Router<br/><i>(/api/inventory, /api/orders, /api/stats, /api/db)</i>"]
+        WSServer["WebSocket Server <i>(ws)</i><br/><i>(Live Inventory & Order Broadcasts)</i>"]
+        AuthMid["Session & RBAC Middleware<br/><i>(Admin / Manager / Staff Roles)</i>"]
+    end
 
-**Prerequisites:**  Node.js
+    subgraph AIEngine["🧠 AI & Intelligence Layer (Google Gemini)"]
+        GeminiFlash["Gemini 2.5/3 Flash<br/><i>(Real-Time Assistant & Strategic Chat)</i>"]
+        GeminiMulti["Gemini Multimodal Vision<br/><i>(Warehouse Blueprint & CAD Layout Analyzer)</i>"]
+        GoogleSearch["Google Search Grounding<br/><i>(Live Market Trends & Hardware Pricing)</i>"]
+    end
 
+    subgraph DataLayer["💾 Persistence & Storage Layer"]
+        DB[(SQLite Database<br/><i>better-sqlite3 / WAL Mode</i>)]
+        subgraph Tables["Schema Tables"]
+            T1["products"]
+            T2["orders & order_items"]
+            T3["order_tracking"]
+            T4["transactions & inventory_logs"]
+            T5["users & roles"]
+        end
+    end
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+    %% Client Interactions
+    UI --> HTTP
+    InvUI --> HTTP
+    OrderUI --> HTTP
+    AIChat --> HTTP
+    WSClient <--> WSServer
+    Twin3D -.-> |Renders Zones & Racks| InvUI
+
+    %% Client <-> Backend
+    HTTP --> Router
+    Router --> AuthMid
+
+    %% Backend <-> Database
+    AuthMid --> DB
+    DB --- Tables
+    Router --> |Trigger Broadcasts| WSServer
+    WSServer -.-> |Live Updates| WSClient
+
+    %% AI Integration
+    AIChat --> GeminiFlash
+    GeminiFlash --> GoogleSearch
+    Router --> |Blueprint Uploads| GeminiMulti
+    GeminiMulti --> |Structured JSON Zones| Twin3D
